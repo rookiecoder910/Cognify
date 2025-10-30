@@ -268,7 +268,7 @@ fun HomeFooter(onLogout: () -> Unit) {
     ) {
         Text(
             text = "Need a break?",
-            style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
+            style = MaterialTheme.typography.labelSmall.copy(color = Color.White)
         )
         Spacer(modifier = Modifier.height(4.dp))
         TextButton(
@@ -276,7 +276,7 @@ fun HomeFooter(onLogout: () -> Unit) {
                 FirebaseAuth.getInstance().signOut()
                 onLogout()
             },
-            colors = ButtonDefaults.textButtonColors(contentColor = Color.Gray)
+            colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
         ) {
             Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout Icon", modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(4.dp))
