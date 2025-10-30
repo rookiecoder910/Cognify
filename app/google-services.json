@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "851554640791",
+    "project_id": "cognify-e5548",
+    "storage_bucket": "cognify-e5548.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:851554640791:android:e4c0f9b3a67bdb26a41ad2",
+        "android_client_info": {
+          "package_name": "com.example.cognify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "851554640791-ears6epukan2v0ao401i6tg155g2jdgi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9r4XK3eGajUX_on-arnbiWRwJQ5YEKEk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "851554640791-ears6epukan2v0ao401i6tg155g2jdgi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
