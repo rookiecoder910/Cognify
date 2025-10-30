@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Cognify</string>
+    <string name="title_activity_cognify_application">CognifyApplication</string>
 </resources>

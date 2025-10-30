@@ -1,3 +1,5 @@
+package com.example.cognify
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cognify.data.login
@@ -7,11 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
-
     private val _uiState = MutableStateFlow(login())
     val uiState: StateFlow<login> = _uiState
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     fun onEmailChange(newEmail: String) {
         _uiState.value = _uiState.value.copy(email = newEmail)
@@ -29,28 +30,24 @@ class LoginViewModel : ViewModel() {
         }
 
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-
         viewModelScope.launch {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
-                    _uiState.value = if (task.isSuccessful) {
+                    _uiState.value = if (task.isSuccessful)
                         _uiState.value.copy(isLoading = false, success = true)
-                    } else {
-                        _uiState.value.copy(
-                            isLoading = false,
-                            error = task.exception?.message ?: "Login failed"
-                        )
-                    }
+                    else
+                        _uiState.value.copy(isLoading = false, error = task.exception?.message)
                 }
         }
     }
+
     fun registerUser(onComplete: (Boolean, String?) -> Unit) {
         val (email, password) = _uiState.value
         if (email.isBlank() || password.isBlank()) {
             onComplete(false, "Please fill all fields")
             return
         }
-        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        _uiState.value = _uiState.value.copy(isLoading = true)
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 _uiState.value = _uiState.value.copy(isLoading = false)
@@ -58,13 +55,13 @@ class LoginViewModel : ViewModel() {
                 else onComplete(false, task.exception?.message)
             }
     }
+
     fun sendPasswordReset(onComplete: (Boolean, String?) -> Unit) {
         val email = _uiState.value.email
         if (email.isBlank()) {
             onComplete(false, "Please enter your email first")
             return
         }
-
         _uiState.value = _uiState.value.copy(isLoading = true)
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
@@ -73,5 +70,4 @@ class LoginViewModel : ViewModel() {
                 else onComplete(false, task.exception?.message)
             }
     }
-
 }

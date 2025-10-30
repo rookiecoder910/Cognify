@@ -1,7 +1,5 @@
 package com.example.cognify.ui.screens
 
-import LoginViewModel
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -13,6 +11,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cognify.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,12 +19,14 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
-    val state = viewModel.uiState.collectAsState().value
+    val state by viewModel.uiState.collectAsState()
     val ctx = LocalContext.current
 
     if (state.success) {
-        Toast.makeText(ctx, "Welcome back!", Toast.LENGTH_SHORT).show()
-        onLoginSuccess()
+        androidx.compose.runtime.LaunchedEffect(Unit) {
+            android.widget.Toast.makeText(ctx, "Welcome back!", android.widget.Toast.LENGTH_SHORT).show()
+            onLoginSuccess()
+        }
     }
 
     Box(
@@ -61,7 +62,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // LOGIN + SIGNUP ROW
             Row(
                 modifier = Modifier.fillMaxWidth(0.8f),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -80,9 +80,9 @@ fun LoginScreen(
                     onClick = {
                         viewModel.registerUser { success, msg ->
                             if (success) {
-                                Toast.makeText(ctx, "Account created! Please log in.", Toast.LENGTH_SHORT).show()
+                                android.widget.Toast.makeText(ctx, "Account created! Please log in.", android.widget.Toast.LENGTH_SHORT).show()
                             } else {
-                                Toast.makeText(ctx, "Error: ${msg ?: "Unknown error"}", Toast.LENGTH_SHORT).show()
+                                android.widget.Toast.makeText(ctx, "Error: ${msg ?: "Unknown error"}", android.widget.Toast.LENGTH_SHORT).show()
                             }
                         }
                     },
@@ -94,14 +94,13 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // FORGOT PASSWORD
             TextButton(
                 onClick = {
                     viewModel.sendPasswordReset { success, msg ->
                         if (success) {
-                            Toast.makeText(ctx, "Password reset email sent!", Toast.LENGTH_SHORT).show()
+                            android.widget.Toast.makeText(ctx, "Password reset email sent!", android.widget.Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(ctx, "Error: ${msg ?: "Invalid email"}", Toast.LENGTH_SHORT).show()
+                            android.widget.Toast.makeText(ctx, "Error: ${msg ?: "Invalid email"}", android.widget.Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -109,7 +108,6 @@ fun LoginScreen(
                 Text("Forgot Password?")
             }
 
-            // ERROR MESSAGE
             state.error?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(it, color = MaterialTheme.colorScheme.error)
