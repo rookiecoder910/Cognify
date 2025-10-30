@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.cognify.screens.HomeScreen
 import com.example.cognify.screens.ReactionGameScreen
+import com.example.cognify.screens.SudokuGameScreen
 import com.example.cognify.ui.screens.GamesListScreen
 
 
@@ -54,13 +55,17 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("games") {
                             GamesListScreen(onPlayMemory = { navController.navigate("games/memory") },
-                                onPlayReaction = { navController.navigate("games/reaction") })
+                                onPlayReaction = { navController.navigate("games/reaction") },
+                                onPlaySudoku = { navController.navigate("games/sudoku") })
                         }
                         composable("games/memory") {
                             MemoryGameScreen(onBack = { navController.popBackStack() })
                         }
                         composable("games/reaction") {
                             ReactionGameScreen(onBack = { navController.popBackStack() })
+                        }
+                        composable("games/sudoku"){
+                            SudokuGameScreen(onBack = { navController.popBackStack() })
                         }
                     }
                 }

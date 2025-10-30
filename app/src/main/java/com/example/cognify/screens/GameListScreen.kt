@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Face
 
 import androidx.compose.material3.*
@@ -24,7 +25,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun GamesListScreen(
     onPlayMemory: () -> Unit,
-    onPlayReaction: () -> Unit
+    onPlayReaction: () -> Unit,
+    onPlaySudoku: () -> Unit
 ) {
     // Define a clear, appealing color palette for the list
     val primaryColor = Color(0xFF1E88E5) // Blue 600
@@ -61,6 +63,15 @@ fun GamesListScreen(
                     "Select a game to boost your cognitive skills!",
                     style = MaterialTheme.typography.titleMedium.copy(color = Color.Gray),
                     modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+            item {
+                GameCard(
+                    title = "Sudoku Challenge",
+                    description = "Boost logic and problem-solving with number puzzles.",
+                    icon = Icons.Default.DateRange, // Use a relevant icon
+                    iconTint = Color(0xFF673AB7), // Purple color
+                    onClick = onPlaySudoku
                 )
             }
 
