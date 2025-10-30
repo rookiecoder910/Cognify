@@ -11,7 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cognify.screens.HomeScreen
 import com.example.cognify.screens.ReactionGameScreen
 import com.example.cognify.screens.SudokuGameScreen
-import com.example.cognify.ui.screens.GamesListScreen
+import com.example.cognify.screens.GamesListScreen
 
 
 import com.example.cognify.ui.screens.LoginScreen

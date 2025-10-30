@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -154,7 +155,7 @@ fun HomeHeader(title: String, subtitle: String) {
     }
 }
 
-// --- Component Breakdown (Unchanged - for reference) ---
+
 @Composable
 fun WelcomeCard(email: String, primaryColor: Color, secondaryColor: Color) {
     // Determine the user name for display
@@ -196,10 +197,11 @@ fun WelcomeCard(email: String, primaryColor: Color, secondaryColor: Color) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Welcome Back, $userName!",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    text = "Welcome Back, user!",
+                    style = typography.headlineMedium.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color.White // High contrast text on color background
+
+                        color = Color.Yellow // High contrast text on color background
                     ),
                     textAlign = TextAlign.Center
                 )
