@@ -9,8 +9,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.cognify.screens.HomeScreen
-import com.example.cognify.ui.screens.LoginScreen
+import com.example.cognify.screens.ReactionGameScreen
+import com.example.cognify.ui.screens.GamesListScreen
 
+
+import com.example.cognify.ui.screens.LoginScreen
+import com.example.cognify.ui.screens.MemoryGameScreen
 import com.example.cognify.ui.theme.CognifyTheme
 
 class MainActivity : ComponentActivity() {
