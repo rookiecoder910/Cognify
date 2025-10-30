@@ -10,6 +10,8 @@ activityCompose = "1.11.0"
 composeBom = "2024.09.00"
 firebaseBom="33.1.2"
 navigationCompose = "2.9.5"
+animationCoreLint = "1.9.4"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,7 +32,8 @@ firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" 
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
-
+firebase-perf-ktx = { group = "com.google.firebase", name = "firebase-perf-ktx" }
+androidx-animation-core-lint = { group = "androidx.compose.animation", name = "animation-core-lint", version.ref = "animationCoreLint" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

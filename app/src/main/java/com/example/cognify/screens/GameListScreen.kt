@@ -8,7 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.LocalIndication // Import for modern ripple
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,11 +21,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -36,226 +39,294 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GamesListScreen(
     onPlayMemory: () -> Unit,
     onPlayReaction: () -> Unit,
     onPlaySudoku: () -> Unit
 ) {
-    // Define a clear, appealing color palette for the list
-    val primaryColor = Color(0xFF1E88E5)
-    val secondaryColor = Color(0xFF00ACC1) // Using this for the animation too
-    val accentColor = Color(0xFF8BC34A) // A new accent for the animation
+    // Modern color palette matching HomeScreen
+    val primaryColor = Color(0xFF6366F1) // Indigo
+    val lightPrimary = Color(0xFF818CF8)
+    val secondaryColor = Color(0xFF06B6D4) // Cyan
+    val accentColor = Color(0xFFF59E0B) // Amber
 
-    // --- Animated Background Effect Setup ---
-    val animationColors = remember { listOf(
-        primaryColor.copy(alpha = 0.6f),
-        secondaryColor.copy(alpha = 0.7f),
-        accentColor.copy(alpha = 0.5f)
-    )}
+    val animationColors = remember {
+        listOf(
+            Color(0xFF6366F1),
+            Color(0xFF818CF8),
+            Color(0xFF06B6D4),
+            Color(0xFF0EA5E9)
+        )
+    }
 
-    val infiniteTransition = rememberInfiniteTransition(label = "BackgroundBlobAnimation")
+    val infiniteTransition = rememberInfiniteTransition(label = "BackgroundAnimation")
 
-    // Animate multiple offsets for a more "wavy" effect
-    val x1Offset by infiniteTransition.animateFloat(
-        initialValue = 0f, targetValue = 1f, animationSpec = infiniteRepeatable(tween(25000, easing = LinearEasing), RepeatMode.Reverse), label = "x1"
-    )
-    val y1Offset by infiniteTransition.animateFloat(
-        initialValue = 0f, targetValue = 1f, animationSpec = infiniteRepeatable(tween(20000, easing = LinearEasing), RepeatMode.Reverse), label = "y1"
-    )
-    val x2Offset by infiniteTransition.animateFloat(
-        initialValue = 1f, targetValue = 0f, animationSpec = infiniteRepeatable(tween(30000, easing = LinearEasing), RepeatMode.Reverse), label = "x2"
-    )
-    val y2Offset by infiniteTransition.animateFloat(
-        initialValue = 1f, targetValue = 0f, animationSpec = infiniteRepeatable(tween(22000, easing = LinearEasing), RepeatMode.Reverse), label = "y2"
+    val xOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 20000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = "xOffset"
     )
 
-    // Create a radial gradient that moves and scales
-    val animatedBrush = Brush.radialGradient(
+    val yOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 15000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = "yOffset"
+    )
+
+    val animatedBrush = Brush.linearGradient(
         colors = animationColors,
-        center = Offset(x1Offset * 2000, y1Offset * 2000), // Larger offsets for movement
-        radius = (1f - x2Offset) * 1500 + 500 // Animate radius for a "breathing" effect
+        start = Offset(xOffset * 0.5f, yOffset * 0.5f),
+        end = Offset(xOffset * 1.5f, yOffset * 1.5f)
     )
-    // --- End Animated Background Effect Setup ---
 
-    // --- Animated Text Logic ---
     val motivationalTexts = remember {
         listOf(
-            "Select a game to boost your cognitive skills!",
-            "Challenge your memory, speed, and logic!",
-            "Track your progress and stay sharp today!"
+            "Choose Your Challenge",
+            "Train Your Mind Daily",
+            "Push Your Limits"
         )
     }
     var textIndex by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            delay(4000)
+            delay(3500)
             textIndex = (textIndex + 1) % motivationalTexts.size
         }
     }
-    // --- End Animated Text Logic ---
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Game Catalog",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = primaryColor, // Keep TopAppBar solid for clarity
-                )
-            )
-        },
-        containerColor = Color.Transparent, // Make Scaffold transparent to see background Box
-    ) { paddingValues ->
-        Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(animatedBrush)
+    ) {
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(animatedBrush) // Apply the animated brush here
-                .padding(paddingValues)
+                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    AnimatedContent(
-                        targetState = motivationalTexts[textIndex],
-                        transitionSpec = {
-                            (slideInVertically { height -> height } + fadeIn()).togetherWith(
-                                slideOutVertically { height -> -height } + fadeOut()
-                            ).using(
-                                SizeTransform(clip = false)
+            item {
+                AnimatedContent(
+                    targetState = motivationalTexts[textIndex],
+                    transitionSpec = {
+                        (slideInVertically { height -> height } + fadeIn(
+                            animationSpec = tween(600)
+                        )).togetherWith(
+                            slideOutVertically { height -> -height } + fadeOut(
+                                animationSpec = tween(600)
                             )
-                        }, label = "Motivational Text Animation"
-                    ) { targetText ->
+                        ).using(
+                            SizeTransform(clip = false)
+                        )
+                    }, label = "MotivationalText"
+                ) { targetText ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White.copy(alpha = 0.15f)
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
                         Text(
-                            targetText,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                color = Color.White, // Text color needs to contrast with animated background
-                                fontWeight = FontWeight.SemiBold
+                            text = targetText,
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 16.dp, top = 8.dp)
+                                .padding(24.dp)
                         )
                     }
                 }
+            }
 
-                // Game Cards (Keep background white to stand out against animation)
-                item {
-                    GameCard(
-                        title = "Sudoku Challenge",
-                        description = "Boost logic and problem-solving with number puzzles.",
-                        icon = Icons.Default.DateRange,
-                        iconTint = Color(0xFF673AB7),
-                        onClick = onPlaySudoku
-                    )
-                }
-                item {
-                    GameCard(
-                        title = "Memory Match",
-                        description = "Sharpen your recall by finding matching pairs.",
-                        icon = Icons.Default.Face,
-                        iconTint = Color(0xFF4CAF50),
-                        onClick = onPlayMemory
-                    )
-                }
-                item {
-                    GameCard(
-                        title = "Reaction Test",
-                        description = "Test your speed! Click as soon as the screen changes.",
-                        icon = Icons.Default.Build,
-                        iconTint = Color(0xFFFFC107),
-                        onClick = onPlayReaction
-                    )
-                }
+            item {
+                Text(
+                    text = "Available Games",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.5.sp
+                    ),
+                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp, start = 4.dp)
+                )
+            }
+
+            item {
+                GameCard(
+                    title = "Sudoku Challenge",
+                    description = "Master logic with number puzzles",
+                    icon = Icons.Default.DateRange,
+                    iconTint = Color(0xFF8B5CF6), // Purple
+                    accentColor = Color(0xFFC084FC),
+                    onClick = onPlaySudoku
+                )
+            }
+
+            item {
+                GameCard(
+                    title = "Memory Match",
+                    description = "Sharpen recall with matching pairs",
+                    icon = Icons.Default.Face,
+                    iconTint = Color(0xFF10B981), // Green
+                    accentColor = Color(0xFF34D399),
+                    onClick = onPlayMemory
+                )
+            }
+
+            item {
+                GameCard(
+                    title = "Reaction Test",
+                    description = "Lightning-fast reflexes training",
+                    icon = Icons.Default.Build,
+                    iconTint = Color(0xFFF59E0B), // Amber
+                    accentColor = Color(0xFFFBBF24),
+                    onClick = onPlayReaction
+                )
             }
         }
     }
 }
 
-// --- Reusable Game Card Component (Using LocalIndication for modern ripple) ---
 @Composable
 fun GameCard(
     title: String,
     description: String,
     icon: ImageVector,
     iconTint: Color,
+    accentColor: Color,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    // Animate the card's elevation: higher when not pressed, slightly lower when pressed
     val cardElevation by animateDpAsState(
-        targetValue = if (isPressed) 2.dp else 8.dp,
-        animationSpec = tween(150), label = "CardElevationAnimation"
+        targetValue = if (isPressed) 4.dp else 12.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "CardElevation"
     )
+
+    val cardScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "CardScale"
+    )
+
+    val infiniteTransition = rememberInfiniteTransition(label = "IconAnimation")
+    val iconRotation by infiniteTransition.animateFloat(
+        initialValue = -3f,
+        targetValue = 3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = "iconRotation"
+    )
+
+
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp)) // Increased corner radius for a softer look
+            .scale(cardScale)
+            .clip(RoundedCornerShape(24.dp))
             .clickable(
                 interactionSource = interactionSource,
-                // Using the recommended default indication (resolves the deprecation warning)
                 indication = LocalIndication.current,
                 onClick = onClick
             ),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        // Use the animated elevation
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
         elevation = CardDefaults.cardElevation(cardElevation)
     ) {
         Row(
             modifier = Modifier
-                .padding(24.dp) // Increased padding for more white space
+                .padding(24.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Box(
                 modifier = Modifier
-                    .size(64.dp) // Slightly larger icon container
-                    .clip(CircleShape) // Use a smooth circle shape
-                    // Use a more opaque background color
-                    .background(iconTint.copy(alpha = 0.2f)),
+                    .size(72.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                iconTint.copy(alpha = 0.2f),
+                                accentColor.copy(alpha = 0.15f)
+                            )
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = "$title Icon",
                     tint = iconTint,
-                    modifier = Modifier.size(38.dp) // Slightly larger icon size
+                    modifier = Modifier
+                        .size(40.dp)
+                        .rotate(iconRotation)
                 )
             }
 
-            Spacer(modifier = Modifier.width(20.dp)) // Increased horizontal spacing
+            Spacer(modifier = Modifier.width(20.dp))
 
-            // --- 2. Text Content Area ---
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold, // Use ExtraBold for better emphasis
-                        fontSize = 20.sp
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 20.sp,
+                        letterSpacing = (-0.3).sp
                     ),
-                    color = Color.Black
+                    color = Color(0xFF1F2937)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+
+                Spacer(modifier = Modifier.height(6.dp))
+
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.DarkGray // Use DarkGray for slightly better readability
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.2.sp
+                    ),
+                    color = Color(0xFF6B7280)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(iconTint.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Play",
+                    tint = iconTint,
+                    modifier = Modifier
+                        .size(28.dp)
+
                 )
             }
         }
