@@ -8,7 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cognify.screens.AchievementsScreen // 🚨 NEW IMPORT
+import com.example.cognify.screens.CaregiverPortalScreen // 🚨 NEW IMPORT
 import com.example.cognify.screens.HomeScreen
+import com.example.cognify.screens.ProgressDashboardScreen // 🚨 NEW IMPORT
 import com.example.cognify.screens.ReactionGameScreen
 import com.example.cognify.screens.SudokuGameScreen
 import com.example.cognify.screens.GamesListScreen
@@ -27,7 +30,6 @@ class MainActivity : ComponentActivity() {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     NavHost(navController = navController, startDestination = "splash") {
                         composable("splash") {
-                            // simple splash -> go to login or home
                             androidx.compose.runtime.LaunchedEffect(Unit) {
                                 val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
                                 if (user != null) navController.navigate("home") {
@@ -44,19 +46,51 @@ class MainActivity : ComponentActivity() {
                                 }
                             })
                         }
+
+                        // 🚨 1. UPDATED HOME SCREEN COMPOSABLE
                         composable("home") {
-                            HomeScreen(onLogout = {
-                                navController.navigate("login") {
-                                    popUpTo("home") { inclusive = true }
+                            HomeScreen(
+                                onLogout = {
+                                    navController.navigate("login") {
+                                        popUpTo("home") { inclusive = true }
+                                    }
+                                },
+                                onNavigateToGames = {
+                                    navController.navigate("games")
+                                },
+                                // NEW NAVIGATION CALLS
+                                onNavigateToProgress = {
+                                    navController.navigate("progressDashboard")
+                                },
+                                onNavigateToAchievements = {
+                                    navController.navigate("achievements")
+                                },
+                                onNavigateToCaregiver = {
+                                    navController.navigate("caregiverPortal")
                                 }
-                            }, onNavigateToGames = {
-                                navController.navigate("games")
-                            })
+                            )
                         }
+
+                        // 🚨 2. ADDED NEW DESTINATION COMPOSABLES
+                        composable("progressDashboard") {
+                            ProgressDashboardScreen(onBack = { navController.popBackStack() })
+                        }
+
+                        composable("achievements") {
+                            AchievementsScreen(onBack = { navController.popBackStack() })
+                        }
+
+                        composable("caregiverPortal") {
+                            CaregiverPortalScreen(onBack = { navController.popBackStack() })
+                        }
+
+                        // Games List and individual game screens
                         composable("games") {
-                            GamesListScreen(onPlayMemory = { navController.navigate("games/memory") },
+                            GamesListScreen(
+                                onPlayMemory = { navController.navigate("games/memory") },
                                 onPlayReaction = { navController.navigate("games/reaction") },
-                                onPlaySudoku = { navController.navigate("games/sudoku") })
+                                onPlaySudoku = { navController.navigate("games/sudoku") }
+                            )
                         }
                         composable("games/memory") {
                             MemoryGameScreen(onBack = { navController.popBackStack() })

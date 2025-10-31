@@ -11,9 +11,12 @@ composeBom = "2024.09.00"
 firebaseBom="33.1.2"
 navigationCompose = "2.9.5"
 animationCoreLint = "1.9.4"
-
+icons-extended = "1.7.5"
+navigationComposeVersion = "2.7.5"
 
 [libraries]
+androidx-navigation-compose-v275 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
+icons-extended = { group = "androidx.compose.material", name = "material-icons-extended-android", version.ref = "icons-extended"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

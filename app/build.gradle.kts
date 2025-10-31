@@ -61,6 +61,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.icons.extended)
     //firebase
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
@@ -70,5 +71,6 @@ dependencies {
 
     // Now declare the Firebase Auth dependency without specifying a version
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.navigation.compose.v275)
 
 }
