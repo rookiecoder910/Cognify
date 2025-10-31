@@ -1,4 +1,4 @@
-package com.example.cognify
+package com.example.cognify.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

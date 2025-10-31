@@ -1,5 +1,6 @@
-package com.example.cognify.ui.screens
+package com.example.cognify.screens
 
+import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -32,7 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.cognify.LoginViewModel
+import com.example.cognify.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
@@ -94,7 +95,7 @@ fun LoginScreen(
 
     if (state.success) {
         LaunchedEffect(Unit) {
-            android.widget.Toast.makeText(ctx, "Welcome back!", android.widget.Toast.LENGTH_SHORT).show()
+            Toast.makeText(ctx, "Welcome back!", Toast.LENGTH_SHORT).show()
             onLoginSuccess()
         }
     }
@@ -258,9 +259,9 @@ fun LoginScreen(
                             onClick = {
                                 viewModel.sendPasswordReset { success, msg ->
                                     if (success) {
-                                        android.widget.Toast.makeText(ctx, "Password reset email sent!", android.widget.Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(ctx, "Password reset email sent!", Toast.LENGTH_SHORT).show()
                                     } else {
-                                        android.widget.Toast.makeText(ctx, "Error: ${msg ?: "Invalid email"}", android.widget.Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(ctx, "Error: ${msg ?: "Invalid email"}", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             }
@@ -344,9 +345,9 @@ fun LoginScreen(
                         onClick = {
                             viewModel.registerUser { success, msg ->
                                 if (success) {
-                                    android.widget.Toast.makeText(ctx, "Account created! Please log in.", android.widget.Toast.LENGTH_LONG).show()
+                                    Toast.makeText(ctx, "Account created! Please log in.", Toast.LENGTH_LONG).show()
                                 } else {
-                                    android.widget.Toast.makeText(ctx, "Error: ${msg ?: "Unknown error"}", android.widget.Toast.LENGTH_LONG).show()
+                                    Toast.makeText(ctx, "Error: ${msg ?: "Unknown error"}", Toast.LENGTH_LONG).show()
                                 }
                             }
                         },

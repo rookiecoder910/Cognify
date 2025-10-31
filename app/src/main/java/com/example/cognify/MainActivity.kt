@@ -8,16 +8,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.cognify.screens.AchievementsScreen // 🚨 NEW IMPORT
-import com.example.cognify.screens.CaregiverPortalScreen // 🚨 NEW IMPORT
+import com.example.cognify.screens.AchievementsScreen
+import com.example.cognify.screens.CaregiverPortalScreen
 import com.example.cognify.screens.HomeScreen
-import com.example.cognify.screens.ProgressDashboardScreen // 🚨 NEW IMPORT
+import com.example.cognify.screens.ProgressDashboardScreen
 import com.example.cognify.screens.ReactionGameScreen
 import com.example.cognify.screens.SudokuGameScreen
 import com.example.cognify.screens.GamesListScreen
 
 
-import com.example.cognify.ui.screens.LoginScreen
+import com.example.cognify.screens.LoginScreen
 import com.example.cognify.ui.screens.MemoryGameScreen
 import com.example.cognify.ui.theme.CognifyTheme
 
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
                             })
                         }
 
-                        // 🚨 1. UPDATED HOME SCREEN COMPOSABLE
+
                         composable("home") {
                             HomeScreen(
                                 onLogout = {
@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // 🚨 2. ADDED NEW DESTINATION COMPOSABLES
+
                         composable("progressDashboard") {
                             ProgressDashboardScreen(onBack = { navController.popBackStack() })
                         }
