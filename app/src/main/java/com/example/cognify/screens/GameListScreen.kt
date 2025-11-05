@@ -18,11 +18,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.FlashAuto
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,7 +45,8 @@ import kotlinx.coroutines.delay
 fun GamesListScreen(
     onPlayMemory: () -> Unit,
     onPlayReaction: () -> Unit,
-    onPlaySudoku: () -> Unit
+    onPlaySudoku: () -> Unit,
+
 ) {
     // Modern color palette matching HomeScreen
     val primaryColor = Color(0xFF6366F1) // Indigo
@@ -53,10 +56,10 @@ fun GamesListScreen(
 
     val animationColors = remember {
         listOf(
-            Color(0xFF6366F1),
-            Color(0xFF818CF8),
-            Color(0xFF06B6D4),
-            Color(0xFF0EA5E9)
+            Color(0xFFD999AF),
+            Color(0xFFD47E9B),
+            Color(0xFFCE4C78),
+            Color(0xFFEF86AB)
         )
     }
 
@@ -166,10 +169,11 @@ fun GamesListScreen(
             item {
                 GameCard(
                     title = "Sudoku Challenge",
-                    description = "Master logic with number puzzles",
-                    icon = Icons.Default.DateRange,
-                    iconTint = Color(0xFF8B5CF6), // Purple
-                    accentColor = Color(0xFFC084FC),
+                    description = "Solve challenging Sudoku puzzles",
+                    icon = Icons.Default.Apps,
+                    iconTint = Color(0xFF6172CD),
+                    backgroundColor = Color(0xFFA4D0F3),
+                    accentColor = Color(0xFFFFE6E6),
                     onClick = onPlaySudoku
                 )
             }
@@ -178,10 +182,11 @@ fun GamesListScreen(
                 GameCard(
                     title = "Memory Match",
                     description = "Sharpen recall with matching pairs",
-                    icon = Icons.Default.Face,
-                    iconTint = Color(0xFF10B981), // Green
-                    accentColor = Color(0xFF34D399),
-                    onClick = onPlayMemory
+                    icon = Icons.Default.Memory,
+                    iconTint = Color(0xFFEF764F), // Green
+                    accentColor = Color(0xFFECE3E3),
+                    onClick = onPlayMemory,
+                    backgroundColor = Color(0xFFE8DEBB),
                 )
             }
 
@@ -189,10 +194,11 @@ fun GamesListScreen(
                 GameCard(
                     title = "Reaction Test",
                     description = "Lightning-fast reflexes training",
-                    icon = Icons.Default.Build,
+                    icon = Icons.Default.FlashAuto,
                     iconTint = Color(0xFFF59E0B), // Amber
-                    accentColor = Color(0xFFFBBF24),
-                    onClick = onPlayReaction
+                    accentColor = Color(0xFFF6E2A0),
+                    onClick = onPlayReaction,
+                    backgroundColor = Color(0xFFEFCA59),
                 )
             }
         }
@@ -206,7 +212,8 @@ fun GameCard(
     icon: ImageVector,
     iconTint: Color,
     accentColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    backgroundColor: Color
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -252,7 +259,7 @@ fun GameCard(
                 onClick = onClick
             ),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor =backgroundColor
         ),
         elevation = CardDefaults.cardElevation(cardElevation)
     ) {

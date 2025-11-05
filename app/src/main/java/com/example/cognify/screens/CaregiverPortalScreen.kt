@@ -209,7 +209,7 @@ fun CaregiverPortalScreen(onBack: () -> Unit) {
 
                             Column {
                                 Text(
-                                    text = "John Doe",
+                                    text = "Dr. Kartik",
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFF1F2937)
@@ -233,11 +233,12 @@ fun CaregiverPortalScreen(onBack: () -> Unit) {
                             ) {
                                 Text(
                                     text = "Active",
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    modifier = Modifier.padding(horizontal = 1.dp, vertical = 6.dp),
                                     style = MaterialTheme.typography.bodySmall.copy(
                                         fontWeight = FontWeight.Bold,
                                         color = successColor
-                                    )
+                                    ),
+                                    maxLines = 1
                                 )
                             }
                         }
