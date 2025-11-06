@@ -3,71 +3,107 @@ package com.example.cognify.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cognify.data.GameSession
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.example.cognify.repository.GameRepository
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
+data class GameStatistics(
+    val totalSessions: Int = 0,
+    val bestScore: Int = 0,
+    val averageScore: Int = 0,
+    val averageAccuracy: Int = 0,
+    val totalTimePlayed: Int = 0,
+    val averageMoves: Int = 0
+)
+
 class GameStatsViewModel(
-    private val userId: String
+    private val userId: String,
+    private val gameName: String
 ) : ViewModel() {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val repository = GameRepository()
 
     private val _sessions = MutableStateFlow<List<GameSession>>(emptyList())
-    val sessions: StateFlow<List<GameSession>> = _sessions
+    val sessions: StateFlow<List<GameSession>> = _sessions.asStateFlow()
 
     private val _loading = MutableStateFlow(true)
-    val loading: StateFlow<Boolean> = _loading
+    val loading: StateFlow<Boolean> = _loading.asStateFlow()
+
+    private val _gameStatistics = MutableStateFlow(GameStatistics())
+    val gameStatistics: StateFlow<GameStatistics> = _gameStatistics.asStateFlow()
 
     init {
         fetchGameStats()
     }
 
-    /** 🔹 Add one dummy game session (for testing Firestore integration) */
-    fun addDummyData(gameName: String = "Memory Match") {
-        val dummy = GameSession(
-            sessionId = "session_${System.currentTimeMillis()}",
-            userId = userId,
-            gameName = gameName,
-            startTime = System.currentTimeMillis() - 60000,
-            endTime = System.currentTimeMillis(),
-            totalScore = (70..100).random(),
-            correctAnswers = (5..10).random(),
-            wrongAnswers = (0..3).random(),
-            avgReactionTime = Random.nextDouble(0.8, 1.8),
-            difficultyLevel = (1..3).random(),
-            date = "2025-11-06"
-        )
-
-        db.collection("game_stats")
-            .document(userId)
-            .collection("stats")
-            .add(dummy)
-            .addOnSuccessListener {
-                fetchGameStats() // refresh after adding
-            }
-            .addOnFailureListener {
-                it.printStackTrace()
-            }
-    }
-
-    /** 🔹 Fetch all sessions from Firestore for the user */
     private fun fetchGameStats() {
         viewModelScope.launch {
-            db.collection("game_stats")
-                .document(userId)
-                .collection("stats")
-                .get()
-                .addOnSuccessListener { result ->
-                    val list = result.documents.mapNotNull { it.toObject(GameSession::class.java) }
-                    _sessions.value = list.sortedByDescending { it.endTime }
+            _loading.value = true
+
+            repository.getGameSessions(userId, gameName)
+                .catch { e ->
+                    e.printStackTrace()
                     _loading.value = false
                 }
-                .addOnFailureListener {
+                .collect { sessionList ->
+                    _sessions.value = sessionList
+                    updateStatistics(sessionList)
                     _loading.value = false
                 }
+        }
+    }
+
+    private fun updateStatistics(sessions: List<GameSession>) {
+        if (sessions.isEmpty()) {
+            _gameStatistics.value = GameStatistics()
+            return
+        }
+
+        val totalSessions = sessions.size
+        val bestScore = sessions.maxOfOrNull { it.totalScore } ?: 0
+        val averageScore = sessions.map { it.totalScore }.average().toInt()
+
+        val averageAccuracy = sessions.mapNotNull { session ->
+            val total = session.correctAnswers + session.wrongAnswers
+            if (total > 0) (session.correctAnswers * 100.0 / total) else null
+        }.average().takeIf { !it.isNaN() }?.toInt() ?: 0
+
+        val totalTimePlayed = sessions.sumOf { it.timeTaken }
+        val averageMoves = sessions.map { it.moves }.average().toInt()
+
+        _gameStatistics.value = GameStatistics(
+            totalSessions = totalSessions,
+            bestScore = bestScore,
+            averageScore = averageScore,
+            averageAccuracy = averageAccuracy,
+            totalTimePlayed = totalTimePlayed,
+            averageMoves = averageMoves
+        )
+    }
+
+    fun addDummyData() {
+        viewModelScope.launch {
+            val dummy = GameSession(
+                sessionId = "session_${System.currentTimeMillis()}",
+                userId = userId,
+                gameName = gameName,
+                startTime = System.currentTimeMillis() - 60000,
+                endTime = System.currentTimeMillis(),
+                totalScore = (500..1000).random(),
+                correctAnswers = (8..12).random(),
+                wrongAnswers = (2..6).random(),
+                avgReactionTime = Random.nextDouble(0.8, 2.0),
+                difficultyLevel = (1..6).random(),
+                date = "",
+                moves = (20..40).random(),
+                timeTaken = (30..120).random(),
+                level = (1..6).random(),
+                matchedPairs = (6..12).random(),
+                totalPairs = 12
+            )
+
+            repository.saveGameSession(dummy)
         }
     }
 }

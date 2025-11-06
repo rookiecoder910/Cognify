@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cognify.screens.AIAssistantScreen
 import com.example.cognify.screens.AchievementsScreen
 import com.example.cognify.screens.CaregiverPortalScreen
 import com.example.cognify.screens.HomeScreen
@@ -75,6 +76,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                         onNavigateToGameStats = {
                                     navController.navigate("insights")
+                                },
+                                onNavigateToAIAssistant = {
+                                    navController.navigate("aiAssistant")
                                 }
                             )
                         }
@@ -98,6 +102,11 @@ class MainActivity : ComponentActivity() {
                                 gameName = "MemoryMatch",
                                 onBack = { navController.popBackStack() })
                         }
+                        composable("aiAssistant") {
+                            AIAssistantScreen(
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
 
 
                         composable("games") {
@@ -111,7 +120,9 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("games/memory") {
-                            MemoryGameScreen(onBack = { navController.popBackStack() })
+                            MemoryGameScreen(
+                                userId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                                onBack = { navController.popBackStack() })
                         }
                         composable("games/reaction") {
                             ReactionGameScreen(onBack = { navController.popBackStack() })

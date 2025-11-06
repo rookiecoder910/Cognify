@@ -188,10 +188,10 @@ fun GamesListScreen(
                     title = "Memory Match",
                     description = "Sharpen recall with matching pairs",
                     icon = Icons.Default.Memory,
-                    iconTint = Color(0xFFEF764F), // Green
+                    iconTint = Color(0xFFECC433), // Green
                     accentColor = Color(0xFFECE3E3),
                     onClick = onPlayMemory,
-                    backgroundColor = Color(0xFFE8DEBB),
+                    backgroundColor = Color(0xFFF8EDAD),
                 )
             }
 
@@ -211,10 +211,10 @@ fun GamesListScreen(
                     title = "Word Puzzles",
                     description = "Sharpen recall with matching pairs",
                     icon = Icons.Default.SortByAlpha,
-                    iconTint = Color(0xFFEF764F),
+                    iconTint = Color(0xFFEE3974),
                     accentColor = Color(0xFFECE3E3),
                     onClick = onPlayWord,
-                    backgroundColor = Color(0xFFE8DEBB),
+                    backgroundColor = Color(0xFFE893AF),
                 )
             }
             item {
@@ -222,10 +222,10 @@ fun GamesListScreen(
                     title = "Sequence Recall",
                     description = "Sharpen recall with matching pairs",
                     icon = Icons.Default.BorderInner,
-                    iconTint = Color(0xFFEF764F),
+                    iconTint = Color(0xFF76447F),
                     accentColor = Color(0xFFECE3E3),
                     onClick = onPlaySequence,
-                    backgroundColor = Color(0xFFE8DEBB),
+                    backgroundColor = Color(0xFFC9B7EA),
                 )
             }
         }

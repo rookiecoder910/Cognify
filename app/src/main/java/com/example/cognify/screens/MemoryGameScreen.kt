@@ -14,9 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
-
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -34,7 +32,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cognify.data.GameLevel
+import com.example.cognify.data.GameSession
+import com.example.cognify.repository.GameRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 val gameLevels = listOf(
@@ -58,12 +59,18 @@ val gameLevels = listOf(
 )
 
 @Composable
-fun MemoryGameScreen(onBack: () -> Unit) {
+fun MemoryGameScreen(
+    userId: String,
+    onBack: () -> Unit
+) {
+    val repository = remember { GameRepository() }
     var currentLevelIndex by remember { mutableStateOf(0) }
     val currentLevel = gameLevels[currentLevelIndex]
 
     key(currentLevelIndex) {
         GameContent(
+            userId = userId,
+            repository = repository,
             level = currentLevel,
             levelNumber = currentLevelIndex + 1,
             onLevelComplete = {
@@ -79,6 +86,8 @@ fun MemoryGameScreen(onBack: () -> Unit) {
 
 @Composable
 fun GameContent(
+    userId: String,
+    repository: GameRepository,
     level: GameLevel,
     levelNumber: Int,
     onLevelComplete: () -> Unit,
@@ -123,25 +132,34 @@ fun GameContent(
         end = Offset(xOffset * 1.5f, yOffset * 1.5f)
     )
 
+    val coroutineScope = rememberCoroutineScope()
+
+    // Game state
+    var startTime by remember { mutableStateOf(System.currentTimeMillis()) }
     val totalCards = level.size
     val pairs = totalCards / 2
-    val theme = level.theme.shuffled(Random(System.currentTimeMillis())).take(pairs)
-    val base = remember { (theme + theme).shuffled(Random(System.currentTimeMillis())) }
+    val theme = remember(levelNumber) {
+        level.theme.shuffled(Random(System.currentTimeMillis())).take(pairs)
+    }
+    val base = remember(levelNumber) {
+        (theme + theme).shuffled(Random(System.currentTimeMillis()))
+    }
 
-    var revealed by remember { mutableStateOf(List(totalCards) { false }) }
-    var matched by remember { mutableStateOf(List(totalCards) { false }) }
-    var firstIndex by remember { mutableStateOf(-1) }
-    var moves by remember { mutableStateOf(0) }
-    var canClick by remember { mutableStateOf(false) }
-    var timeElapsed by remember { mutableStateOf(0) }
-    var isGameActive by remember { mutableStateOf(true) }
-    var showPreview by remember { mutableStateOf(true) }
+    var revealed by remember(levelNumber) { mutableStateOf(List(totalCards) { false }) }
+    var matched by remember(levelNumber) { mutableStateOf(List(totalCards) { false }) }
+    var firstIndex by remember(levelNumber) { mutableStateOf(-1) }
+    var moves by remember(levelNumber) { mutableStateOf(0) }
+    var canClick by remember(levelNumber) { mutableStateOf(false) }
+    var timeElapsed by remember(levelNumber) { mutableStateOf(0) }
+    var isGameActive by remember(levelNumber) { mutableStateOf(true) }
+    var showPreview by remember(levelNumber) { mutableStateOf(true) }
 
     val isGameComplete = matched.all { it }
     val matchedPairs = matched.count { it } / 2
 
-    // Preview all cards for 3 seconds at start
-    LaunchedEffect(Unit) {
+    // Reset start time and show preview when level starts
+    LaunchedEffect(levelNumber) {
+        startTime = System.currentTimeMillis()
         revealed = List(totalCards) { true }
         delay(1500)
         revealed = List(totalCards) { false }
@@ -159,7 +177,8 @@ fun GameContent(
         }
     }
 
-    LaunchedEffect(revealed) {
+    // Game logic and save to Firestore
+    LaunchedEffect(revealed, matched) {
         val revealedButNotMatchedIndices = revealed.mapIndexedNotNull { index, isRevealed ->
             if (isRevealed && !matched[index]) index else null
         }
@@ -186,8 +205,42 @@ fun GameContent(
             canClick = true
         }
 
+        // Save session data when game is complete
         if (isGameComplete && isGameActive) {
             isGameActive = false
+
+            val endTime = System.currentTimeMillis()
+            val sessionDuration = (endTime - startTime) / 1000.0
+
+            val gameSession = GameSession(
+                sessionId = "memory_${userId}_${endTime}",
+                userId = userId,
+                gameName = "Memory Match",
+                startTime = startTime,
+                endTime = endTime,
+                totalScore = calculateScore(moves, timeElapsed, levelNumber),
+                correctAnswers = matchedPairs,
+                wrongAnswers = moves - matchedPairs,
+                avgReactionTime = sessionDuration / moves.coerceAtLeast(1),
+                difficultyLevel = levelNumber,
+                date = "", // Will be set by repository
+                moves = moves,
+                timeTaken = timeElapsed,
+                level = levelNumber,
+                matchedPairs = matchedPairs,
+                totalPairs = pairs
+            )
+
+            // Save to Firestore
+            coroutineScope.launch {
+                try {
+                    repository.saveGameSession(gameSession)
+                    println("✅ Game session saved successfully!")
+                } catch (e: Exception) {
+                    println("❌ Error saving game session: ${e.message}")
+                }
+            }
+
             delay(800)
             onLevelComplete()
         }
@@ -331,7 +384,10 @@ fun GameContent(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    itemsIndexed(base) { idx, emoji ->
+                    itemsIndexed(
+                        items = base,
+                        key = { index, _ -> "card_$index" }
+                    ) { idx, emoji ->
                         PremiumMemoryCard(
                             emoji = emoji,
                             isRevealed = revealed[idx],
@@ -361,6 +417,7 @@ fun GameContent(
                 moves = moves,
                 time = timeElapsed,
                 totalLevels = gameLevels.size,
+                score = calculateScore(moves, timeElapsed, levelNumber),
                 onNextLevel = {
                     if (levelNumber < gameLevels.size) {
                         onLevelComplete()
@@ -572,7 +629,6 @@ fun PremiumMemoryCard(
                 }
             }
 
-            // Preview overlay with countdown
             if (isPreview) {
                 Box(
                     modifier = Modifier
@@ -589,6 +645,7 @@ fun PremiumLevelCompleteOverlay(
     level: Int,
     moves: Int,
     time: Int,
+    score: Int,
     totalLevels: Int,
     onNextLevel: () -> Unit,
     primaryColor: Color,
@@ -676,6 +733,36 @@ fun PremiumLevelCompleteOverlay(
 
                 Spacer(modifier = Modifier.height(28.dp))
 
+                // Score display
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = successColor.copy(alpha = 0.1f)
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Score",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = Color.Gray
+                            )
+                        )
+                        Text(
+                            text = "⭐ $score",
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                color = successColor
+                            )
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -746,4 +833,14 @@ fun PremiumScoreItem(label: String, value: String, color: Color) {
             )
         }
     }
+}
+
+// Helper function to calculate score
+private fun calculateScore(moves: Int, time: Int, level: Int): Int {
+    val baseScore = 1000
+    val movePenalty = moves * 5
+    val timePenalty = time * 2
+    val levelBonus = level * 100
+
+    return maxOf(baseScore - movePenalty - timePenalty + levelBonus, 0)
 }

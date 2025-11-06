@@ -1,10 +1,14 @@
 package com.example.cognify.screens
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,11 +19,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,16 +39,18 @@ fun GameStatsScreen(
     gameName: String,
     onBack: () -> Unit,
     viewModel: GameStatsViewModel = viewModel(
-        factory = GameStatsViewModelFactory(userId)
+        factory = GameStatsViewModelFactory(userId, gameName)
     )
 ) {
     val sessions by viewModel.sessions.collectAsState()
     val loading by viewModel.loading.collectAsState()
+    val stats by viewModel.gameStatistics.collectAsState()
 
     val primaryColor = Color(0xFF6366F1)
     val secondaryColor = Color(0xFF06B6D4)
     val accentColor = Color(0xFFF59E0B)
     val successColor = Color(0xFF10B981)
+    val errorColor = Color(0xFFEF4444)
 
     val animationColors = remember {
         listOf(
@@ -77,434 +85,212 @@ fun GameStatsScreen(
         end = Offset(xOffset * 1.5f, yOffset * 1.5f)
     )
 
-    // Calculate stats
-    val totalSessions = sessions.size
-    val averageScore = if (sessions.isNotEmpty()) {
-        sessions.map { it.totalScore }.average().toInt()
-    } else 0
-    val bestScore = sessions.maxOfOrNull { it.totalScore } ?: 0
-    val averageAccuracy = if (sessions.isNotEmpty()) {
-        sessions.map { session ->
-            val total = session.correctAnswers + session.wrongAnswers
-            if (total > 0) (session.correctAnswers * 100.0 / total) else 0.0
-        }.average().toInt()
-    } else 0
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(animatedBrush)
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 20.dp, horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                // Header Card
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    shape = RoundedCornerShape(24.dp),
-                    elevation = CardDefaults.cardElevation(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = onBack,
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(CircleShape)
-                                .background(primaryColor.copy(alpha = 0.1f))
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = primaryColor,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                text = gameName,
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = primaryColor
-                                )
-                            )
-                            Text(
-                                text = "Your Statistics",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Gray,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            )
-                        }
-
-                        IconButton(
-                            onClick = { viewModel.addDummyData() },
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(CircleShape)
-                                .background(accentColor.copy(alpha = 0.1f))
-                        ) {
-                            Icon(
-                                Icons.Default.AddCircle,
-                                contentDescription = "Add Test Data",
-                                tint = accentColor,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-            item {
-                // Overall Stats Grid
-                Text(
-                    text = "Performance Overview",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 16.sp
-                    ),
-                    modifier = Modifier.padding(start = 4.dp)
+        if (loading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    strokeWidth = 4.dp,
+                    modifier = Modifier.size(60.dp)
                 )
             }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OverviewStatCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Sessions",
-                        value = totalSessions.toString(),
-                        icon = Icons.Default.PlayCircle,
-                        color = primaryColor
-                    )
-                    OverviewStatCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Best",
-                        value = bestScore.toString(),
-                        icon = Icons.Default.EmojiEvents,
-                        color = accentColor
-                    )
-                }
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OverviewStatCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Avg Score",
-                        value = averageScore.toString(),
-                        icon = Icons.Default.BarChart,
-                        color = secondaryColor
-                    )
-                    OverviewStatCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Accuracy",
-                        value = "$averageAccuracy%",
-                        icon = Icons.Default.CheckCircle,
-                        color = successColor
-                    )
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Recent Sessions",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 16.sp
-                    ),
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-            }
-
-            if (loading) {
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                // Header
                 item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = Color.White)
-                    }
-                }
-            } else if (sessions.isEmpty()) {
-                item {
-                    EmptyStateCard(
+                    PremiumHeader(
                         gameName = gameName,
+                        totalSessions = stats.totalSessions,
+                        onBack = onBack,
                         onAddData = { viewModel.addDummyData() },
-                        primaryColor = primaryColor
-                    )
-                }
-            } else {
-                items(sessions.take(10)) { session ->
-                    EnhancedGameStatCard(
-                        session = session,
                         primaryColor = primaryColor,
-                        successColor = successColor,
                         accentColor = accentColor
                     )
                 }
+
+                // Performance Overview
+                item {
+                    PerformanceOverviewSection(
+                        stats = stats,
+                        primaryColor = primaryColor,
+                        secondaryColor = secondaryColor,
+                        accentColor = accentColor,
+                        successColor = successColor
+                    )
+                }
+
+                // Recent Sessions Header
+                if (sessions.isNotEmpty()) {
+                    item {
+                        SectionHeader(
+                            title = "Recent Games",
+                            subtitle = "${sessions.size} sessions played",
+                            icon = Icons.Default.History
+                        )
+                    }
+
+                    // Session cards with staggered animation
+                    itemsIndexed(
+                        items = sessions.take(10),
+                        key = { _, session -> session.sessionId }
+                    ) { index, session ->
+                        AnimatedVisibility(
+                            visible = true,
+                            enter = fadeIn(
+                                animationSpec = tween(
+                                    durationMillis = 400,
+                                    delayMillis = index * 80
+                                )
+                            ) + slideInVertically(
+                                animationSpec = tween(
+                                    durationMillis = 400,
+                                    delayMillis = index * 80
+                                ),
+                                initialOffsetY = { it / 3 }
+                            )
+                        ) {
+                            ModernGameStatCard(
+                                session = session,
+                                primaryColor = primaryColor,
+                                successColor = successColor,
+                                accentColor = accentColor,
+                                errorColor = errorColor
+                            )
+                        }
+                    }
+                } else {
+                    item {
+                        ModernEmptyState(
+                            gameName = gameName,
+                            onAddData = { viewModel.addDummyData() },
+                            primaryColor = primaryColor
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun OverviewStatCard(
-    modifier: Modifier = Modifier,
-    title: String,
-    value: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    color: Color
-) {
-    val infiniteTransition = rememberInfiniteTransition(label = "Stat")
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = -5f,
-        targetValue = 5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ), label = "rotation"
-    )
-
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(8.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(color.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = color,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .rotate(rotation)
-                )
-            }
-
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = color
-                )
-            )
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = Color.Gray,
-                    fontWeight = FontWeight.Medium
-                )
-            )
-        }
-    }
-}
-
-@Composable
-fun EnhancedGameStatCard(
-    session: GameSession,
+private fun PremiumHeader(
+    gameName: String,
+    totalSessions: Int,
+    onBack: () -> Unit,
+    onAddData: () -> Unit,
     primaryColor: Color,
-    successColor: Color,
     accentColor: Color
 ) {
-    val accuracy = if (session.correctAnswers + session.wrongAnswers == 0) {
-        0
-    } else {
-        (session.correctAnswers * 100) / (session.correctAnswers + session.wrongAnswers)
-    }
-
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(8.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.95f)
+        ),
+        shape = RoundedCornerShape(28.dp),
+        elevation = CardDefaults.cardElevation(16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(24.dp)
         ) {
-            // Header row with date and score
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(primaryColor.copy(alpha = 0.1f))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(primaryColor.copy(alpha = 0.15f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.CalendarMonth,
-                            contentDescription = null,
-                            tint = primaryColor,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    Column {
-                        Text(
-                            text = session.date,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1F2937)
-                            )
-                        )
-                        Text(
-                            text = "Game Session",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = Color.Gray
-                            )
-                        )
-                    }
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = primaryColor,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
+
+                IconButton(
+                    onClick = onAddData,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(accentColor.copy(alpha = 0.1f))
+                ) {
+                    Icon(
+                        Icons.Default.Science,
+                        contentDescription = "Add Test Data",
+                        tint = accentColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    primaryColor.copy(alpha = 0.2f),
+                                    primaryColor.copy(alpha = 0.1f)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "\uD83E\uDDE0",
+                        fontSize = 40.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = gameName,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF1F2937),
+                        fontSize = 28.sp
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = accentColor.copy(alpha = 0.15f)
+                        containerColor = primaryColor.copy(alpha = 0.1f)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Star,
-                            contentDescription = null,
-                            tint = accentColor,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text(
-                            text = session.totalScore.toString(),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                color = accentColor
-                            )
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Stats grid
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                StatItem(
-                    label = "Accuracy",
-                    value = "$accuracy%",
-                    icon = Icons.Default.CheckCircle,
-                    color = successColor
-                )
-
-                Divider(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .width(1.dp),
-                    color = Color(0xFFE2E8F0)
-                )
-
-                StatItem(
-                    label = "Correct",
-                    value = session.correctAnswers.toString(),
-                    icon = Icons.Default.Done,
-                    color = Color(0xFF10B981)
-                )
-
-                Divider(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .width(1.dp),
-                    color = Color(0xFFE2E8F0)
-                )
-
-                StatItem(
-                    label = "Wrong",
-                    value = session.wrongAnswers.toString(),
-                    icon = Icons.Default.Close,
-                    color = Color(0xFFEF4444)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Reaction time
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = primaryColor.copy(alpha = 0.05f)
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Speed,
-                        contentDescription = null,
-                        tint = primaryColor,
-                        modifier = Modifier.size(20.dp)
-                    )
                     Text(
-                        text = "Avg Reaction Time:",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Medium
-                        )
-                    )
-                    Text(
-                        text = "${"%.2f".format(session.avgReactionTime)}s",
+                        text = "$totalSessions Games Played",
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = primaryColor
@@ -517,26 +303,390 @@ fun EnhancedGameStatCard(
 }
 
 @Composable
-fun StatItem(
+private fun PerformanceOverviewSection(
+    stats: com.example.cognify.viewmodel.GameStatistics,
+    primaryColor: Color,
+    secondaryColor: Color,
+    accentColor: Color,
+    successColor: Color
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+    ) {
+        SectionHeader(
+            title = "Performance",
+            subtitle = "Your overall statistics",
+            icon = Icons.Default.TrendingUp
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.height(400.dp),
+            userScrollEnabled = false
+        ) {
+            items(
+                listOf(
+                    StatData("Total Games", stats.totalSessions.toString(), Icons.Default.PlayCircle, primaryColor),
+                    StatData("Best Score", "⭐ ${stats.bestScore}", Icons.Default.EmojiEvents, accentColor),
+                    StatData("Average Score", stats.averageScore.toString(), Icons.Default.BarChart, secondaryColor),
+                    StatData("Accuracy", "${stats.averageAccuracy}%", Icons.Default.CheckCircle, successColor)
+                )
+            ) { stat ->
+                PremiumStatCard(
+                    title = stat.title,
+                    value = stat.value,
+                    icon = stat.icon,
+                    color = stat.color
+                )
+            }
+        }
+    }
+}
+
+private data class StatData(
+    val title: String,
+    val value: String,
+    val icon: ImageVector,
+    val color: Color
+)
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun PremiumStatCard(
+    title: String,
+    value: String,
+    icon: ImageVector,
+    color: Color
+) {
+    val scale by rememberInfiniteTransition(label = "scale").animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scale"
+    )
+
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.95f)
+        ),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                color.copy(alpha = 0.2f),
+                                color.copy(alpha = 0.1f)
+                            )
+                        )
+                    )
+                    .scale(scale),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = color,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            AnimatedContent(
+                targetState = value,
+                transitionSpec = {
+                    slideInVertically { height -> height } + fadeIn() with
+                            slideOutVertically { height -> -height } + fadeOut()
+                },
+                label = "valueAnimation"
+            ) { targetValue ->
+                Text(
+                    text = targetValue,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = color,
+                        fontSize = 28.sp
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = Color.Gray,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp
+                ),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    subtitle: String,
+    icon: ImageVector
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White,
+                    fontSize = 22.sp
+                )
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontWeight = FontWeight.Medium
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun ModernGameStatCard(
+    session: GameSession,
+    primaryColor: Color,
+    successColor: Color,
+    accentColor: Color,
+    errorColor: Color
+) {
+    val accuracy = if (session.correctAnswers + session.wrongAnswers == 0) {
+        0
+    } else {
+        (session.correctAnswers * 100) / (session.correctAnswers + session.wrongAnswers)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.95f)
+        ),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        primaryColor.copy(alpha = 0.2f),
+                                        primaryColor.copy(alpha = 0.1f)
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Gamepad,
+                            contentDescription = null,
+                            tint = primaryColor,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+
+                    Column {
+                        Text(
+                            text = session.date.split(" ").firstOrNull() ?: session.date,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1F2937)
+                            )
+                        )
+                        Text(
+                            text = "Level ${session.level}",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color.Gray,
+                                fontWeight = FontWeight.Medium
+                            )
+                        )
+                    }
+                }
+
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = accentColor.copy(alpha = 0.15f)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Star,
+                            contentDescription = null,
+                            tint = accentColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = session.totalScore.toString(),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                color = accentColor
+                            )
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Stats Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ModernStatItem(
+                    label = "Accuracy",
+                    value = "$accuracy%",
+                    icon = Icons.Default.CheckCircle,
+                    color = successColor
+                )
+
+                ModernStatItem(
+                    label = "Moves",
+                    value = session.moves.toString(),
+                    icon = Icons.Default.TouchApp,
+                    color = primaryColor
+                )
+
+                ModernStatItem(
+                    label = "Time",
+                    value = "${session.timeTaken}s",
+                    icon = Icons.Default.Timer,
+                    color = accentColor
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Progress indicators
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ProgressIndicatorCard(
+                    modifier = Modifier.weight(1f),
+                    label = "Pairs Matched",
+                    current = session.matchedPairs,
+                    total = session.totalPairs,
+                    color = successColor
+                )
+
+                ProgressIndicatorCard(
+                    modifier = Modifier.weight(1f),
+                    label = "Efficiency",
+                    current = accuracy,
+                    total = 100,
+                    color = primaryColor
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModernStatItem(
     label: String,
     value: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     color: Color
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = color,
-            modifier = Modifier.size(20.dp)
-        )
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = color,
+                modifier = Modifier.size(20.dp)
+            )
+        }
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 color = color
             )
         )
@@ -551,63 +701,136 @@ fun StatItem(
 }
 
 @Composable
-fun EmptyStateCard(
+private fun ProgressIndicatorCard(
+    modifier: Modifier = Modifier,
+    label: String,
+    current: Int,
+    total: Int,
+    color: Color
+) {
+    val progress = if (total > 0) current.toFloat() / total.toFloat() else 0f
+
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = color.copy(alpha = 0.05f)
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = Color.Gray,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 11.sp
+                    )
+                )
+                Text(
+                    text = "$current/$total",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = color,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+
+            LinearProgressIndicator(
+                progress = progress,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+                color = color,
+                trackColor = color.copy(alpha = 0.2f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ModernEmptyState(
     gameName: String,
     onAddData: () -> Unit,
     primaryColor: Color
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(12.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.95f)
+        ),
+        shape = RoundedCornerShape(28.dp),
+        elevation = CardDefaults.cardElevation(16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(40.dp),
+                .padding(48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text(
-                text = "📊",
-                fontSize = 64.sp
-            )
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(primaryColor.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "🎮",
+                    fontSize = 64.sp
+                )
+            }
 
             Text(
-                text = "No Sessions Yet",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
+                text = "No Games Yet!",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF1F2937)
                 )
             )
 
             Text(
-                text = "Play $gameName to see your statistics here",
-                style = MaterialTheme.typography.bodyMedium.copy(
+                text = "Play $gameName and watch your stats come to life here!",
+                style = MaterialTheme.typography.bodyLarge.copy(
                     color = Color.Gray,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    lineHeight = 24.sp
                 )
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedButton(
+            Button(
                 onClick = onAddData,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = primaryColor
+                ),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = primaryColor
-                )
+                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
             ) {
                 Icon(
                     Icons.Default.Science,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(12.dp))
                 Text(
-                    "Add Test Data",
-                    fontWeight = FontWeight.Bold
+                    "Generate Sample Data",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
                 )
             }
         }
