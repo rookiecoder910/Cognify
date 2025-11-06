@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.perf.ktx)
     implementation(libs.androidx.animation.core.lint)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -72,6 +73,7 @@ dependencies {
     // Now declare the Firebase Auth dependency without specifying a version
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.navigation.compose.v275)
+    implementation("com.google.firebase:firebase-firestore:26.0.2")
 
 
 }

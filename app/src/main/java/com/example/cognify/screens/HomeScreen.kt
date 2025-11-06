@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.scale
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Games
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.getValue
@@ -45,7 +46,8 @@ fun HomeScreen(
     onNavigateToGames: () -> Unit,
     onNavigateToProgress: () -> Unit = {},
     onNavigateToAchievements: () -> Unit = {},
-    onNavigateToCaregiver: () -> Unit = {}
+    onNavigateToCaregiver: () -> Unit = {},
+    onNavigateToGameStats: () -> Unit = {}
 ) {
     val user = FirebaseAuth.getInstance().currentUser
     val email = user?.email ?: "Guest"
@@ -155,6 +157,7 @@ fun HomeScreen(
                         primaryColor = primaryColor,
                         secondaryColor = secondaryColor,
                         accentColor = accentColor
+
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -196,7 +199,9 @@ fun HomeScreen(
                 },
                 primaryColor = primaryColor,
                 secondaryColor = secondaryColor,
-                accentColor = accentColor
+                accentColor = accentColor,
+                onNavigateToGameStats = {
+                    showMenuDialog = false; onNavigateToGameStats() },
             )
         }
     }
@@ -209,6 +214,7 @@ fun FullScreenMenu(
     onNavigateToAchievements: () -> Unit,
     onNavigateToCaregiver: () -> Unit,
     onNavigateToGames: () -> Unit,
+    onNavigateToGameStats: () -> Unit,
     primaryColor: Color,
     secondaryColor: Color,
     accentColor: Color
@@ -276,6 +282,14 @@ fun FullScreenMenu(
                     color = secondaryColor,
                     onClick = onNavigateToCaregiver
                 )
+                MenuOption(
+                    title = "Game Insights",
+                    description = "View session analytics & performance",
+                    icon = Icons.Default.Games,
+                    color = Color(0xFF3B82F6),
+                    onClick = onNavigateToGameStats
+                )
+
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -458,6 +472,7 @@ fun QuickAccessMenu(
     onNavigateToProgress: () -> Unit,
     onNavigateToAchievements: () -> Unit,
     onNavigateToCaregiver: () -> Unit,
+
     primaryColor: Color,
     secondaryColor: Color,
     accentColor: Color
@@ -503,6 +518,7 @@ fun QuickAccessMenu(
                 color = secondaryColor,
                 onClick = onNavigateToCaregiver
             )
+
         }
     }
 }

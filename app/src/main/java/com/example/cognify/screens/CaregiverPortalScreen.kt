@@ -255,6 +255,7 @@ fun CaregiverPortalScreen(onBack: () -> Unit) {
                     QuickActionCard(
                         modifier = Modifier.weight(1f),
                         title = "Emergency",
+
                         icon = Icons.Default.LocalHospital,
                         color = errorColor,
                         onClick = { /* Emergency contact */ }

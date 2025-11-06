@@ -14,6 +14,7 @@ animationCoreLint = "1.9.4"
 icons-extended = "1.7.5"
 navigationComposeVersion = "2.7.5"
 
+
 [libraries]
 androidx-navigation-compose-v275 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 icons-extended = { group = "androidx.compose.material", name = "material-icons-extended-android", version.ref = "icons-extended"}
@@ -37,6 +38,7 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 firebase-perf-ktx = { group = "com.google.firebase", name = "firebase-perf-ktx" }
 androidx-animation-core-lint = { group = "androidx.compose.animation", name = "animation-core-lint", version.ref = "animationCoreLint" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

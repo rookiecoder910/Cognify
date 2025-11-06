@@ -19,12 +19,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.BorderInner
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.FlashAuto
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,6 +48,9 @@ fun GamesListScreen(
     onPlayMemory: () -> Unit,
     onPlayReaction: () -> Unit,
     onPlaySudoku: () -> Unit,
+    onPlaySequence: () -> Unit,
+    onPlayWord: () -> Unit,
+
 
 ) {
     // Modern color palette matching HomeScreen
@@ -199,6 +204,28 @@ fun GamesListScreen(
                     accentColor = Color(0xFFF6E2A0),
                     onClick = onPlayReaction,
                     backgroundColor = Color(0xFFEFCA59),
+                )
+            }
+            item {
+                GameCard(
+                    title = "Word Puzzles",
+                    description = "Sharpen recall with matching pairs",
+                    icon = Icons.Default.SortByAlpha,
+                    iconTint = Color(0xFFEF764F),
+                    accentColor = Color(0xFFECE3E3),
+                    onClick = onPlayWord,
+                    backgroundColor = Color(0xFFE8DEBB),
+                )
+            }
+            item {
+                GameCard(
+                    title = "Sequence Recall",
+                    description = "Sharpen recall with matching pairs",
+                    icon = Icons.Default.BorderInner,
+                    iconTint = Color(0xFFEF764F),
+                    accentColor = Color(0xFFECE3E3),
+                    onClick = onPlaySequence,
+                    backgroundColor = Color(0xFFE8DEBB),
                 )
             }
         }

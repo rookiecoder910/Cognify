@@ -18,8 +18,12 @@ import com.example.cognify.screens.GamesListScreen
 
 
 import com.example.cognify.screens.LoginScreen
+import com.example.cognify.screens.SequenceRecallGameScreen
+import com.example.cognify.screens.WordCompletionGameScreen
+import com.example.cognify.screens.GameStatsScreen
 import com.example.cognify.ui.screens.MemoryGameScreen
 import com.example.cognify.ui.theme.CognifyTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +35,8 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navController, startDestination = "splash") {
                         composable("splash") {
                             androidx.compose.runtime.LaunchedEffect(Unit) {
-                                val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+                                val user =
+                                    com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
                                 if (user != null) navController.navigate("home") {
                                     popUpTo("splash") { inclusive = true }
                                 } else navController.navigate("login") {
@@ -58,7 +63,7 @@ class MainActivity : ComponentActivity() {
                                 onNavigateToGames = {
                                     navController.navigate("games")
                                 },
-                                // NEW NAVIGATION CALLS
+
                                 onNavigateToProgress = {
                                     navController.navigate("progressDashboard")
                                 },
@@ -67,6 +72,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onNavigateToCaregiver = {
                                     navController.navigate("caregiverPortal")
+                                },
+                                        onNavigateToGameStats = {
+                                    navController.navigate("insights")
                                 }
                             )
                         }
@@ -83,13 +91,23 @@ class MainActivity : ComponentActivity() {
                         composable("caregiverPortal") {
                             CaregiverPortalScreen(onBack = { navController.popBackStack() })
                         }
+                        composable("insights"){
 
-                        // Games List and individual game screens
+                            GameStatsScreen(
+                                userId =FirebaseAuth.getInstance().currentUser?.uid ?: "",  // Replace with actual user id from ViewModel or Firebase
+                                gameName = "MemoryMatch",
+                                onBack = { navController.popBackStack() })
+                        }
+
+
                         composable("games") {
                             GamesListScreen(
                                 onPlayMemory = { navController.navigate("games/memory") },
                                 onPlayReaction = { navController.navigate("games/reaction") },
-                                onPlaySudoku = { navController.navigate("games/sudoku") }
+                                onPlaySudoku = { navController.navigate("games/sudoku") },
+                                onPlaySequence = { navController.navigate("games/sequence") },
+                                onPlayWord = { navController.navigate("games/word") }
+
                             )
                         }
                         composable("games/memory") {
@@ -98,8 +116,14 @@ class MainActivity : ComponentActivity() {
                         composable("games/reaction") {
                             ReactionGameScreen(onBack = { navController.popBackStack() })
                         }
-                        composable("games/sudoku"){
+                        composable("games/sudoku") {
                             SudokuGameScreen(onBack = { navController.popBackStack() })
+                        }
+                        composable("games/sequence") {
+                            SequenceRecallGameScreen(onBack = { navController.popBackStack() })
+                        }
+                        composable("games/word") {
+                            WordCompletionGameScreen(onBack = { navController.popBackStack() })
                         }
                     }
                 }
