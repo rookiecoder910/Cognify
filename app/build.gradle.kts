@@ -94,6 +94,14 @@ dependencies {
     implementation("io.ktor:ktor-client-logging:2.3.7")
     //coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // Animations
+    implementation("androidx.compose.animation:animation-core:1.9.4")
 
+    // Pager for carousel
+    implementation ("com.google.accompanist:accompanist-pager:0.36.0")
 
+    // System UI (for blur effects)
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.36.0")
 }
+
+

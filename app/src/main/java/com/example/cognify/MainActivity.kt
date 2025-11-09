@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                         composable("splash") {
                             androidx.compose.runtime.LaunchedEffect(Unit) {
                                 val user =
-                                    com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+                               FirebaseAuth.getInstance().currentUser
                                 if (user != null) navController.navigate("home") {
                                     popUpTo("splash") { inclusive = true }
                                 } else navController.navigate("login") {
