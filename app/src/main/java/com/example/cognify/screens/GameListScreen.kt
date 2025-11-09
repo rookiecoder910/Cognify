@@ -90,8 +90,8 @@ fun GamesListScreen(
                 icon = Icons.Default.Memory,
                 games = listOf(
                     Game("Memory Match", "Sharpen recall with matching pairs", "Easy", "🧩", onPlayMemory),
-                    Game("Pattern Matrix", "Remember complex patterns", "Medium", "🎯", onPlayMemory),
-                    Game("Visual Recall", "Test your visual memory", "Hard", "👁️", onPlayMemory),
+//                    Game("Pattern Matrix", "Remember complex patterns", "Medium", "🎯", onPlayMemory),
+//                    Game("Visual Recall", "Test your visual memory", "Hard", "👁️", onPlayMemory),
                 )
             ),
             Planet(
@@ -112,8 +112,8 @@ fun GamesListScreen(
                 icon = Icons.Default.Apps,
                 games = listOf(
                     Game("Sudoku Challenge", "Solve challenging puzzles", "Easy", "⚙️", onPlaySudoku),
-                    Game("Pattern Detective", "Find logical patterns", "Medium", "🔍", onPlaySudoku),
-                    Game("Quantum Puzzles", "Advanced reasoning", "Hard", "🧠", onPlaySudoku),
+//                    Game("Pattern Detective", "Find logical patterns", "Medium", "🔍", onPlaySudoku),
+//                    Game("Quantum Puzzles", "Advanced reasoning", "Hard", "🧠", onPlaySudoku),
                 )
             ),
             Planet(
@@ -122,9 +122,9 @@ fun GamesListScreen(
                 bgHue = 15f,
                 icon = Icons.Default.FlashOn,
                 games = listOf(
-                    Game("Rapid Fire", "Quick reaction challenges", "Easy", "⚡", onPlayReaction),
-                    Game("Time Attack", "Beat the clock", "Medium", "⏱️", onPlayReaction),
-                    Game("Lightning Round", "Ultimate speed test", "Hard", "🔥", onPlayReaction),
+                    Game("Reaction Speed", "Quick reaction challenges", "Easy", "⚡", onPlayReaction),
+//                    Game("Time Attack", "Beat the clock", "Medium", "⏱️", onPlayReaction),
+//                    Game("Lightning Round", "Ultimate speed test", "Hard", "🔥", onPlayReaction),
                 )
             ),
             Planet(
@@ -134,8 +134,8 @@ fun GamesListScreen(
                 icon = Icons.Default.Star,
                 games = listOf(
                     Game("Word Puzzles", "Creative word challenges", "Easy", "🎨", onPlayWord),
-                    Game("Idea Generator", "Think outside the box", "Medium", "💡", onPlayWord),
-                    Game("Dream Weaver", "Ultimate creative test", "Hard", "✨", onPlayWord),
+//                    Game("Idea Generator", "Think outside the box", "Medium", "💡", onPlayWord),
+//                    Game("Dream Weaver", "Ultimate creative test", "Hard", "✨", onPlayWord),
                 )
             ),
             Planet(
@@ -145,8 +145,8 @@ fun GamesListScreen(
                 icon = Icons.Default.Extension,
                 games = listOf(
                     Game("Sequence Recall", "Remember number patterns", "Easy", "🧩", onPlaySequence),
-                    Game("Strategy King", "Plan your moves ahead", "Medium", "♟️", onPlaySequence),
-                    Game("Enigma Elite", "Crack complex problems", "Hard", "🔐", onPlaySequence),
+//                    Game("Strategy King", "Plan your moves ahead", "Medium", "♟️", onPlaySequence),
+//                    Game("Enigma Elite", "Crack complex problems", "Hard", "🔐", onPlaySequence),
                 )
             ),
         )
@@ -651,24 +651,24 @@ fun EnhancedPlanet(
             .offset(y = floatOffset.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Multi-layer glow effect for selected planet
         if (isSelected) {
-            // Outer glow
+            // Outer soft glow (wider, subtle)
             Box(
                 modifier = Modifier
                     .size(190.dp)
-                    .scale(glowPulse)
-                    .blur(25.dp)
-                    .background(planet.color.copy(alpha = 0.25f), CircleShape)
+                    .clip(CircleShape)
+                    .background(planet.color.copy(alpha = 0.25f))
+                    .blur(30.dp) // smoother, wider diffusion
             )
 
-            // Middle glow
+            // Middle glow (pulsing core)
             Box(
                 modifier = Modifier
                     .size(160.dp)
-                    .scale(glowPulse)
-                    .blur(15.dp)
-                    .background(planet.color.copy(alpha = 0.35f), CircleShape)
+                    .scale(glowPulse) // gentle breathing animation
+                    .clip(CircleShape)
+                    .background(planet.color.copy(alpha = 0.4f))
+                    .blur(18.dp)
             )
         }
 
